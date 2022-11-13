@@ -1,33 +1,34 @@
-
-# System imports
-from time import sleep
-
-# Local imports
-from hal import hal_led as led
-from hal import hal_lcd as LCD
+from threading import Thread
 from hal import hal_keypad as keypad
+from hal import hal_lcd as LCD
+
+#Empty list to store sequence of keypad presses
+password = []
+
+lcd = LCD.lcd()
+lcd.lcd_clear()
+
+#Call back function invoked when any key on keypad is pressed
+def key_pressed(key):
+    password.append(key)
+
+    print(password)
 
 
 def main():
-    #Initiallize LED driver
-    led.init()
-
-    #Initiallize Keypad driver
-    keypad.init()
-
-    # Instantiate and initialize the LCD driver
+    # Initialize LCD
     lcd = LCD.lcd()
-
-    sleep(0.5)
-    lcd.backlight(0)  # turn backlight off
-
-    sleep(0.5)
-    lcd.backlight(1)  # turn backlight on
-
-    #Clear LCD and display message
     lcd.lcd_clear()
-    lcd.lcd_display_string("DevOps for AIoT", 1)  # write on line 1
-    lcd.lcd_display_string("Lab 5", 2)  # write on line 2
+
+    # Display something on LCD
+    lcd.lcd_display_string("Lab 5", 1)
+
+    # Initialize the HAL keypad driver
+    keypad.init(key_pressed)
+
+    # Start the keypad scanning which will run forever in an infinite while(True) loop in a new Thread "keypad_thread"
+    keypad_thread = Thread(target=keypad.get_key)
+    keypad_thread.start()
 
 
 # Main entry point
